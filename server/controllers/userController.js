@@ -57,3 +57,9 @@ export const login = async (req, res) => {
     });
   }
 };
+
+export const checkAuth = async (req, res) => {
+  res.json({ success: true, user: req.user });
+};
+
+export const updateProfile = async (req, res) => {};

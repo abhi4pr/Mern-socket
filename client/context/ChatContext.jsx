@@ -27,7 +27,7 @@ export const ChatProvider = ({ children }) => {
     try {
       const { data } = await axios.get(`/api/messages/${userId}`);
       if (data.success) {
-        setMessages(data.message);
+        setMessages(data.messages);
       }
     } catch (error) {
       toast.error(error.message);
@@ -82,7 +82,7 @@ export const ChatProvider = ({ children }) => {
     users,
     selectedUser,
     getUsers,
-    setMessages,
+    getMessages,
     sendMessage,
     setSelectedUser,
     unseenMessages,

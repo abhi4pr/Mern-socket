@@ -3,66 +3,7 @@ import { formatMessageTime } from "../lib/utils";
 import { AuthContext } from "../../context/AuthContext";
 import { ChatContext } from "../../context/ChatContext";
 
-const ChatContainer = ({ selectedUser, setSelectedUser }) => {
-  const messagesDummyData = [
-    {
-      _id: "680f571ff10f3cd28382f094",
-      senderId: "680f5116f10f3cd28382ed02",
-      receiverId: "680f50e4f10f3cd28382ecf9",
-      text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      seen: true,
-      createdAt: "2025-04-28T10:23:27.844Z",
-    },
-    {
-      _id: "680f5726f10f3cd28382f0b1",
-      senderId: "680f50e4f10f3cd28382ecf9",
-      receiverId: "680f5116f10f3cd28382ed02",
-      text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      seen: true,
-      createdAt: "2025-04-28T10:23:34.520Z",
-    },
-    {
-      _id: "680f5729f10f3cd28382f0b6",
-      senderId: "680f5116f10f3cd28382ed02",
-      receiverId: "680f50e4f10f3cd28382ecf9",
-      text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      seen: true,
-      createdAt: "2025-04-28T10:23:37.301Z",
-    },
-    {
-      _id: "680f572cf10f3cd28382f0bb",
-      senderId: "680f50e4f10f3cd28382ecf9",
-      receiverId: "680f5116f10f3cd28382ed02",
-      text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      seen: true,
-      createdAt: "2025-04-28T10:23:40.334Z",
-    },
-    {
-      _id: "680f573cf10f3cd28382f0c0",
-      senderId: "680f50e4f10f3cd28382ecf9",
-      receiverId: "680f5116f10f3cd28382ed02",
-      image: "../assets/pic1.png",
-      seen: true,
-      createdAt: "2025-04-28T10:23:56.265Z",
-    },
-    {
-      _id: "680f5745f10f3cd28382f0c5",
-      senderId: "680f5116f10f3cd28382ed02",
-      receiverId: "680f50e4f10f3cd28382ecf9",
-      image: "../assets/pic2.png",
-      seen: true,
-      createdAt: "2025-04-28T10:24:05.164Z",
-    },
-    {
-      _id: "680f5748f10f3cd28382f0ca",
-      senderId: "680f5116f10f3cd28382ed02",
-      receiverId: "680f50e4f10f3cd28382ecf9",
-      text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      seen: true,
-      createdAt: "2025-04-28T10:24:08.523Z",
-    },
-  ];
-
+const ChatContainer = () => {
   const { messages, selectedUser, setSelectedUser, sendMessage, getMessages } =
     useContext(ChatContext);
   const { authUser, onlineUsers } = useContext(AuthContext);
@@ -71,10 +12,16 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
   const scrollEnd = useRef();
 
   useEffect(() => {
-    if (scrollEnd.current) {
+    if (selectedUser) {
+      getMessages(selectedUser._id);
+    }
+  }, [selectedUser]);
+
+  useEffect(() => {
+    if (scrollEnd.current && messages) {
       scrollEnd.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, []);
+  }, [messages]);
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -117,56 +64,53 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
         <img src="../assets/help_icon.png" className="max-md:hidden max-w-5" />
       </div>
       <div className="flex flex-col h-[calc(100%-120px)] overflow-y-auto px-4 pb-6">
-        {messagesDummyData.map((msg) => {
-          const isMe = msg.senderId === "680f5116f10f3cd28382ed02";
-
+        {messages?.map((msg, index) => {
           return (
             <div
-              key={msg._id}
-              className={`flex items-end gap-2 mb-4 ${isMe ? "justify-end" : "justify-start"}`}
+              key={index}
+              className={`flex items-end gap-2 mb-4 ${
+                msg.senderId === authUser._id ? "justify-end" : "justify-start"
+              }`}
             >
-              {!isMe && (
-                <>
+              {/* Avatar + timestamp — only for incoming messages (left side) */}
+              {msg.senderId !== authUser._id && (
+                <div className="flex flex-col items-center">
                   <img
-                    src="../assets/avatar_icon.png"
-                    className="w-8 h-8 rounded-full mt-1"
+                    src={selectedUser.profilePic || "../assets/avatar_icon.png"}
+                    className="w-8 h-8 rounded-full"
                     alt=""
                   />
-                  <p className="text-gray-500">
+                  <p className="text-xs text-gray-500 mt-1">
                     {formatMessageTime(msg.createdAt)}
                   </p>
-                </>
+                </div>
               )}
 
+              {/* Message bubble */}
               {msg.image ? (
                 <img
                   src={msg.image}
                   className="max-w-[260px] rounded-xl object-cover"
+                  alt="shared image"
                 />
               ) : (
                 <p
-                  className={`px-3 py-2 rounded-2xl max-w-[70%] text-sm
-              ${
-                isMe
-                  ? "bg-violet-600/90 rounded-br-none"
-                  : "bg-zinc-700/90 rounded-bl-none"
-              }`}
+                  className={`px-3 py-2 rounded-2xl max-w-[70%] text-sm break-words
+        ${
+          msg.senderId === authUser._id
+            ? "bg-violet-600/90 rounded-br-none" // my message
+            : "bg-zinc-700/90 rounded-bl-none" // incoming
+        }`}
                 >
                   {msg.text}
                 </p>
               )}
 
-              {isMe && (
-                <>
-                  <img
-                    src="../assets/pic1.png"
-                    className="w-8 h-8 rounded-full mt-1"
-                    alt=""
-                  />
-                  <p className="text-gray-500">
-                    {formatMessageTime(msg.createdAt)}
-                  </p>
-                </>
+              {/* For my own messages – small time below or on right */}
+              {msg.senderId === authUser._id && (
+                <p className="text-xs text-gray-500 self-end mb-1 ml-2">
+                  {formatMessageTime(msg.createdAt)}
+                </p>
               )}
             </div>
           );
@@ -206,7 +150,10 @@ const ChatContainer = ({ selectedUser, setSelectedUser }) => {
     </div>
   ) : (
     <div className="flex flex-col items-center justify-center gap-2 text-gray-500 bg-white/10 max-md:hidden">
-      <img src="../assets/logo.png" className="max-w-16" />
+      <img
+        src={authUser.profilePic || "../assets/avatar.png"}
+        className="max-w-16"
+      />
       <p className="text-lg font-medium text-white">Chat anytime</p>
     </div>
   );

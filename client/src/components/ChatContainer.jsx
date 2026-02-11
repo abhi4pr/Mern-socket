@@ -53,8 +53,9 @@ const ChatContainer = () => {
         />
         <p className="flex-1 text-lg text-white flex items-center gap-2">
           {selectedUser.fullName}
-          {onlineUsers.includes(selectedUser._id)}
-          <span className="w-2 h-2 rounded-full bg-screen-500"></span>
+          {onlineUsers.includes(selectedUser._id) && (
+            <span className="w-2 h-2 rounded-full bg-screen-500"></span>
+          )}
         </p>
         <img
           onClick={() => setSelectedUser(null)}
@@ -150,10 +151,7 @@ const ChatContainer = () => {
     </div>
   ) : (
     <div className="flex flex-col items-center justify-center gap-2 text-gray-500 bg-white/10 max-md:hidden">
-      <img
-        src={authUser.profilePic || "../assets/avatar.png"}
-        className="max-w-16"
-      />
+      <img src={"../assets/avatar_icon.png"} className="max-w-16" />
       <p className="text-lg font-medium text-white">Chat anytime</p>
     </div>
   );
